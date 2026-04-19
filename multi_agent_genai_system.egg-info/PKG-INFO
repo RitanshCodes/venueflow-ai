@@ -1,0 +1,115 @@
+Metadata-Version: 2.4
+Name: multi-agent-genai-system
+Version: 0.1.0
+Summary: Advanced starter project for a multi-agent GenAI system
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.115.0
+Requires-Dist: uvicorn>=0.30.0
+Requires-Dist: pydantic>=2.8.0
+Requires-Dist: python-dotenv>=1.0.1
+Requires-Dist: openai>=1.40.0
+
+# Multi-Agent GenAI System
+
+An advanced starter project for building a multi-agent AI application with:
+
+- a central orchestrator
+- specialized agents with distinct roles
+- pluggable model providers
+- a FastAPI service
+- a CLI workflow for local runs
+- typed state and execution traces
+
+## Architecture
+
+The default workflow is:
+
+1. `PlannerAgent` breaks a user goal into a concrete plan.
+2. `ResearchAgent` expands the plan with domain notes and evidence targets.
+3. `ExecutorAgent` drafts the final solution.
+4. `CriticAgent` reviews the draft and requests revisions when needed.
+5. `Orchestrator` returns a final answer with the full trace.
+
+This project ships with a mock provider so the whole system runs without API keys. To use a real model, configure the OpenAI provider with your key.
+
+## Quick Start
+
+### 1. Create a virtual environment
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+### 2. Install dependencies
+
+```powershell
+pip install -e .
+```
+
+### 3. Configure environment
+
+Copy `.env.example` to `.env` and set:
+
+```env
+OPENAI_API_KEY=your_key_here
+MODEL_PROVIDER=mock
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+Use `MODEL_PROVIDER=openai` when you want real model calls.
+
+### 4. Run the CLI
+
+```powershell
+python -m app.cli --goal "Design a go-to-market plan for an AI research assistant for law firms"
+```
+
+### 5. Run the API
+
+```powershell
+uvicorn app.main:app --reload --app-dir .
+```
+
+Then open:
+
+- `GET /health`
+- `POST /runs`
+
+Example request:
+
+```json
+{
+  "goal": "Create a product strategy for a multi-agent AI code review assistant",
+  "context": {
+    "audience": "engineering managers",
+    "constraints": [
+      "B2B SaaS launch in 90 days",
+      "Small founding team"
+    ]
+  }
+}
+```
+
+## Project Structure
+
+```text
+multi-agent-genai-system/
+  app/
+    agents/
+    api/
+    core/
+    providers/
+    services/
+  tests/
+```
+
+## Next Ideas
+
+- add memory and retrieval
+- route tasks to different model tiers
+- persist traces in a database
+- add tool-using agents
+- attach a frontend dashboard
+

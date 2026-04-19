@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VenueFlow AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/app.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy-block">
+          <p class="eyebrow">Hackathon Demo / Physical Event Experience</p>
+          <h1>VenueFlow AI</h1>
+          <p class="hero-copy">
+            An AI command center for major sporting venues that reduces queues, reroutes crowd pressure,
+            and coordinates staff plus fan messaging in real time.
+          </p>
+          <div class="hero-tags">
+            <span class="pill">Crowd Movement</span>
+            <span class="pill">Wait Time Reduction</span>
+            <span class="pill">Live Coordination</span>
+            <span class="pill">Attendee Experience</span>
+          </div>
+        </div>
+
+        <aside class="hero-card">
+          <div class="status-row">
+            <div class="status-pill" id="socket-status">Offline</div>
+            <div class="status-mini">Mock-ready</div>
+          </div>
+
+          <div>
+            <p class="hero-metric-label">Mode</p>
+            <p class="hero-metric-value" id="hero-mode">AI Command Center + WebSocket Simulation</p>
+          </div>
+
+          <div class="hero-stats">
+            <article class="hero-stat">
+              <p class="hero-metric-label">Event</p>
+              <p class="hero-stat-value" id="event-label">No session</p>
+            </article>
+            <article class="hero-stat">
+              <p class="hero-metric-label">Attendance</p>
+              <p class="hero-stat-value" id="attendance-label">-</p>
+            </article>
+            <article class="hero-stat">
+              <p class="hero-metric-label">Priority</p>
+              <p class="hero-stat-value" id="priority-label">Balanced</p>
+            </article>
+          </div>
+        </aside>
+      </header>
+
+      <main class="layout">
+        <section class="panel control-panel">
+          <p class="section-kicker">Build The Runbook</p>
+          <h2>Launch a venue simulation</h2>
+          <p class="muted">
+            Start with the venue, event, and known friction. Then send live floor updates the way an ops lead
+            would during match day.
+          </p>
+
+          <div class="preset-strip">
+            <button
+              class="preset-btn"
+              type="button"
+              data-venue="SkyDome Arena"
+              data-event="City Derby Final"
+              data-attendance="62000"
+              data-priority="crowd_flow"
+              data-context="South gate surge expected 35 minutes before kickoff after a simultaneous metro arrival."
+            >
+              Derby Surge
+            </button>
+            <button
+              class="preset-btn"
+              type="button"
+              data-venue="Harbor Field"
+              data-event="Night Cricket Clash"
+              data-attendance="48000"
+              data-priority="wait_times"
+              data-context="Rain delay risk could trigger simultaneous restroom and concession spikes at innings break."
+            >
+              Rain Delay Reset
+            </button>
+            <button
+              class="preset-btn"
+              type="button"
+              data-venue="Grand National Stadium"
+              data-event="Championship Opener"
+              data-attendance="40000"
+              data-priority="accessibility"
+              data-context="Family sections and wheelchair entry are concentrated on the west concourse, so wayfinding must stay clear."
+            >
+              Accessibility First
+            </button>
+          </div>
+
+          <form id="start-form">
+            <label>
+              Venue
+              <input id="venue-name" type="text" value="SkyDome Arena" required />
+            </label>
+
+            <label>
+              Event
+              <input id="event-name" type="text" value="City Derby Final" required />
+            </label>
+
+            <div class="grid-two">
+              <label>
+                Expected attendance
+                <input id="expected-attendance" type="number" min="1000" max="150000" value="62000" required />
+              </label>
+
+              <label>
+                Priority
+                <select id="priority">
+                  <option value="balanced">Balanced</option>
+                  <option value="crowd_flow" selected>Crowd flow</option>
+                  <option value="wait_times">Wait times</option>
+                  <option value="accessibility">Accessibility</option>
+                  <option value="premium_service">Premium service</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="grid-two">
+              <label>
+                Live rounds
+                <select id="round-limit">
+                  <option value="2">2</option>
+                  <option value="3" selected>3</option>
+                  <option value="4">4</option>
+                </select>
+              </label>
+
+              <label>
+                Demo mode
+                <input type="text" value="FastAPI + WebSockets + Multi-Agent Ops" disabled />
+              </label>
+            </div>
+
+            <label>
+              Known friction
+              <textarea
+                id="known-friction"
+                rows="4"
+                placeholder="Example: South gate scanners are historically the slowest and parking shuttles arrive in waves."
+              >South gate surge expected 35 minutes before kickoff after a simultaneous metro arrival.</textarea>
+            </label>
+
+            <button type="submit" class="primary-btn">Launch Command Center</button>
+          </form>
+
+          <div class="session-meta" id="session-meta">
+            <h3>Mission Brief</h3>
+            <p class="muted">Start a simulation to see the north star, hotspot watchlist, and quick wins.</p>
+          </div>
+        </section>
+
+        <section class="panel transcript-panel">
+          <div class="section-header">
+            <div>
+              <p class="section-kicker">Live Ops Loop</p>
+              <h2>Incident timeline</h2>
+              <p class="muted">
+                Use this stream like a match-day command desk. Submit updates and watch the system respond with
+                field actions plus fan messaging.
+              </p>
+            </div>
+            <div class="round-chip" id="round-chip">Round 0</div>
+          </div>
+
+          <div class="transcript" id="transcript"></div>
+
+          <form id="update-form" class="input-form">
+            <label>
+              Field update
+              <textarea
+                id="update"
+                rows="5"
+                placeholder="Example: Gate 3 queue hit 18 minutes after two scanners failed; fans are backing into the plaza and accessible guests are getting mixed into the main line."
+                required
+              ></textarea>
+            </label>
+            <button type="submit" class="primary-btn" id="submit-update" disabled>Send Live Update</button>
+          </form>
+        </section>
+
+        <section class="panel analysis-panel">
+          <p class="section-kicker">Experience Intelligence</p>
+          <h2>Decision quality</h2>
+
+          <div class="score-grid" id="score-grid">
+            <article class="score-card">
+              <p class="score-label">Crowd Flow</p>
+              <p class="score-value">0</p>
+              <div class="score-bar"><span style="width: 0%"></span></div>
+            </article>
+            <article class="score-card">
+              <p class="score-label">Wait Time</p>
+              <p class="score-value">0</p>
+              <div class="score-bar"><span style="width: 0%"></span></div>
+            </article>
+            <article class="score-card">
+              <p class="score-label">Coordination</p>
+              <p class="score-value">0</p>
+              <div class="score-bar"><span style="width: 0%"></span></div>
+            </article>
+            <article class="score-card">
+              <p class="score-label">Fan Experience</p>
+              <p class="score-value">0</p>
+              <div class="score-bar"><span style="width: 0%"></span></div>
+            </article>
+            <article class="score-card overall">
+              <p class="score-label">Overall</p>
+              <p class="score-value">0</p>
+              <div class="score-bar"><span style="width: 0%"></span></div>
+            </article>
+          </div>
+
+          <div class="analysis-stack">
+            <article class="detail-card">
+              <h3>Analyst Feedback</h3>
+              <div id="analyst-feedback" class="detail-body muted">No round scored yet.</div>
+            </article>
+
+            <article class="detail-card">
+              <h3>Flagged Risks</h3>
+              <div id="flagged-risks" class="tag-list muted">No risks flagged yet.</div>
+            </article>
+
+            <article class="detail-card highlight">
+              <h3>Dispatcher Actions</h3>
+              <div id="dispatcher-actions" class="detail-body muted">
+                Field actions will appear here after the first live update.
+              </div>
+            </article>
+
+            <article class="detail-card">
+              <h3>Experience Lens</h3>
+              <div id="experience-lens" class="detail-body muted">
+                The attendee experience layer will call out accessibility, reassurance, and service-recovery gaps.
+              </div>
+            </article>
+
+            <article class="detail-card" id="summary-card">
+              <h3>Session Summary</h3>
+              <div id="summary" class="detail-body muted">Finish the live rounds to unlock the final summary.</div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

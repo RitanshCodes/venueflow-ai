@@ -1,0 +1,148 @@
+# VenueFlow AI
+
+VenueFlow AI is a hackathon-ready command center for improving the physical event experience at large sporting venues.
+
+It helps operators:
+
+- predict crowd pressure before it becomes unsafe or frustrating
+- cut waiting times at gates, concessions, and restrooms
+- coordinate security, ushers, guest services, and dispatch in real time
+- send clearer fan-facing updates during live disruptions
+- keep accessibility and family experience visible during every response
+
+The repo includes:
+
+- a FastAPI backend
+- a WebSocket-powered live simulation loop
+- a multi-agent workflow for strategy, analysis, dispatch, and attendee experience
+- a deterministic `mock` mode for offline demos
+- a browser UI designed for hackathon presentations
+
+## Product Flow
+
+1. Launch a venue simulation with the stadium, event, attendance, and priority.
+2. VenueFlow AI generates a kickoff brief, hotspot watchlist, quick wins, and a fan-facing message.
+3. Submit live floor updates such as gate surges, scanner failures, or rain-delay congestion.
+4. The system scores the response across crowd flow, wait time, coordination, and fan experience.
+5. Multi-agent outputs generate field actions, guest messaging, accessibility checks, and an end-of-session summary.
+
+## Multi-Agent Architecture
+
+1. `VenueStrategistAgent` creates the opening command brief and hotspot watchlist.
+2. `OperationsAnalystAgent` explains what is working, what is exposed, and what to do next.
+3. `DispatcherAgent` turns floor updates into a concrete live response plus public messaging.
+4. `ExperienceCoachAgent` checks signage, accessibility, service recovery, and attendee confidence.
+5. `VenueOperationsScorer` provides deterministic scoring even in `mock` mode.
+
+## Quick Start
+
+### 1. Create a virtual environment
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+### 2. Install dependencies
+
+```powershell
+pip install -e .
+```
+
+For tests:
+
+```powershell
+pip install -e .[dev]
+```
+
+### 3. Configure environment
+
+Copy `.env.example` to `.env` and set:
+
+```env
+OPENAI_API_KEY=your_key_here
+MODEL_PROVIDER=mock
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+Keep `MODEL_PROVIDER=mock` for offline demos. Switch to `MODEL_PROVIDER=openai` when you want live model responses.
+
+## Run The Project
+
+### Browser Demo
+
+```powershell
+uvicorn app.main:app --reload --app-dir .
+```
+
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+### CLI Demo
+
+Kickoff packet only:
+
+```powershell
+python -m app.cli --venue "SkyDome Arena" --event "City Derby Final" --attendance 62000 --priority crowd_flow
+```
+
+Simulate one live response:
+
+```powershell
+python -m app.cli --venue "SkyDome Arena" --event "City Derby Final" --attendance 62000 --priority crowd_flow --update "Gate 3 queue hit 18 minutes after two scanners failed, fans are backing into the plaza, and accessible guests are mixing into the main line."
+```
+
+## API Endpoints
+
+- `GET /health`
+- `GET /`
+- `POST /operations/start`
+- `POST /operations/simulate`
+- `WS /ws/operations`
+
+## Example: Start A Session
+
+```json
+{
+  "venue_name": "Grand National Stadium",
+  "event_name": "Championship Opener",
+  "expected_attendance": 42000,
+  "priority": "crowd_flow",
+  "round_limit": 3,
+  "context": {
+    "known_friction": "West gate scanners are historically slow and metro arrivals come in waves."
+  }
+}
+```
+
+## Example: Simulate One Round
+
+```json
+{
+  "venue_name": "Grand National Stadium",
+  "event_name": "Championship Opener",
+  "expected_attendance": 42000,
+  "priority": "wait_times",
+  "operator_update": "Gate 3 queue reached 18 minutes after two scanners failed, fans are backing into the plaza, and we need security plus guest services aligned on a fallback lane.",
+  "round_limit": 2
+}
+```
+
+## Project Structure
+
+```text
+multi-agent-genai-system/
+  app/
+    agents/
+    api/
+    core/
+    providers/
+    services/
+    static/
+  tests/
+```
+
+## Demo Notes
+
+- Use the built-in presets in the UI to move quickly during a hackathon demo.
+- `mock` mode is deterministic, so the product still works without internet or API access.
+- The most distinctive feature is the human-experience layer: every operational response is paired with fan messaging and accessibility guidance.
