@@ -787,7 +787,7 @@ body::before {
   gap: 14px;
 }
 
-.control-form + .control-form {
+.control-form+.control-form {
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid rgba(84, 76, 164, 0.24);
@@ -1003,7 +1003,7 @@ input:focus {
   padding-left: 18px;
 }
 
-.bullet-list li + li {
+.bullet-list li+li {
   margin-top: 8px;
 }
 
@@ -1045,6 +1045,7 @@ input:focus {
 }
 
 @media (max-width: 1220px) {
+
   .showcase-layout,
   .dashboard-grid,
   .intel-grid {
